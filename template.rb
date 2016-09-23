@@ -1,0 +1,321 @@
+# Gems
+
+gsub_file('Gemfile', /\# Use sqlite3.*\'sqlite3\'/m, '')
+
+inject_into_file "Gemfile", "\n\nruby '2.3.1'", after: "source 'https://rubygems.org'"
+
+gem "solidus", git: "https://github.com/solidusio/solidus"
+gem "solidus_auth_devise"
+gem "rollbar"
+gem "pg"
+gem "le"
+gem "mandrill-api"
+gem "newrelic_rpm"
+gem "twilio-ruby"
+
+gem_group :development do
+  gem "better_errors"
+  gem "binding_of_caller"
+  gem "bullet"
+  gem "guard"
+  gem "guard-livereload", require: false
+  gem "guard-minitest"
+  gem "guard-rubocop"
+  gem "listen"
+  gem "meta_request"
+  gem "rubocop"
+  gem "shog"
+end
+
+gem_group :test do
+  gem "codeclimate-test-reporter", require: nil
+  gem "factory_girl_rails"
+  gem "minitest-ci"
+  gem "minitest-reporters", require: false
+  gem "mocha", require: false
+  gem "ruby-prof"
+  gem "simplecov", require: false
+  gem "vcr"
+  gem "webmock"
+end
+
+gem_group :development, :test do
+  gem "awesome_print"
+  gem "jazz_fingers"
+  gem "pry-rails"
+  gem "rails-erd"
+end
+
+gem_group :staging, :production do
+  gem "rails_12factor"
+  gem "rails_stdout_logging"
+end
+
+application 'config.action_mailer.preview_path = "#{Rails.root}/lib/mailer_previews"'
+application do
+<<-EOS
+config.to_prepare do
+      Devise::Mailer.layout "mailer"
+    end
+EOS
+end
+application 'config.time_zone = "Eastern Time (US & Canada)"'
+
+# Additional modules
+empty_directory 'app/carriers'
+empty_directory 'app/facades'
+empty_directory 'app/services'
+application do
+<<-EOS
+# Custom directories with classes and modules that are autoloadable.
+    config.autoload_paths += [
+      "\#{config.root}/app/carriers",
+      "\#{config.root}/app/facades",
+      "\#{config.root}/app/services",
+    ]
+EOS
+end
+application 'config.assets.paths << Rails.root.join("app", "assets", "fonts")'
+
+gsub_file "config/environments/test.rb", /\s\s\sconfig\.action_mailer\.perform_caching.*false/, ""
+inject_into_file 'config/environments/test.rb', "\n  # Randomize the order test cases are executed.\n  config.active_support.test_order = :random\n", after: "config.action_mailer.delivery_method = :test\n"
+
+gsub_file "config/database.yml", /adapter: sqlite3/, "adapter: postgresql"
+gsub_file "config/database.yml", /\s\s\stimeout: 5000/, ""
+gsub_file "config/database.yml", /\sproduction:.*/m, ""
+gsub_file "config/database.yml", /^#.*$\s/, ""
+
+inject_into_file "config/database.yml", before: /\A.*/ do
+<<-EOS
+<% branch_name = `git symbolic-ref HEAD 2>/dev/null`.chomp.sub('refs/heads/', '') %>
+<% repository_name = `git rev-parse --show-toplevel`.split('/').last.strip %>
+
+EOS
+end
+
+inject_into_file "config/database.yml", "\n  host: localhost", after: "adapter: postgresql"
+gsub_file "config/database.yml", /db\/development\.sqlite3/, '<%= "#{repository_name}_development_#{branch_name}"[0...63] %>'
+gsub_file "config/database.yml", /db\/test\.sqlite3/, '<%= "#{repository_name}_test"[0...63] %>'
+
+# .gitignore
+
+# .ruby-version
+file ".ruby-version", "2.3.1\n"
+
+#. CircleCI
+file "config/database.yml.ci", <<-CODE
+test:
+  host: localhost
+  username: ubuntu
+  databse: circle_ruby_test
+  adapter: postgresql
+  pool: 5
+
+CODE
+
+file "circle.yml", <<-CODE
+machine:
+  timezone:
+    America/New_York
+  ruby:
+    version:
+      2.3.1
+
+# Customize database setup
+database:
+  override:
+  # replace CircleCI's generated database.yml
+  - cp config.database.yml.ci config/database.yml
+  - bundle exec rake db:create db:schema:load --trace
+
+test:
+  minitest_globs:
+    - test/**/*_test.rb
+
+CODE
+
+# Puma
+inject_into_file "config/puma.rb", "\npreload_app!\nrackup      DefaultRackup\n", after: "threads threads_count, threads_count\n"
+
+inject_into_file "config/puma.rb", after: "plugin :tmp_restart\n" do
+<<-EOS
+
+on_worker_boot do
+  # Worker specific setup for Rails 4.1+
+  # See: https://devcenter.heroku.com/articles/deploying-rails-applications-with-the-puma-web-server#on-worker-boot
+  ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
+end
+
+EOS
+end
+
+file "Procfile", <<-CODE
+web: bundle exec puma -C config/puma.rb
+worker: bundle exec rake jobs:work
+
+CODE
+
+# Staging environment
+file "config/environments/staging.rb", <<-CODE
+Rails.application.configure do
+  config.cache_classes = true
+  config.eager_load = true
+  config.consider_all_requests_local = false
+  config.action_controller.perform_caching = true
+  config.public_file_server.enabled  = true
+  config.assets.js_compressor = :uglifier
+  config.assets.compile = false
+  config.assets.version = '1.0'
+  config.log_level = :debug
+  config.i18n.fallbacks = true
+  config.active_support.deprecation = :notify
+  config.log_formatter = ::Logger::Formatter.new
+end
+
+CODE
+
+# config/locales/devise.en.yml
+
+# config/secrets.yml
+
+# Delayed Job
+file "bin/delayed_job", <<-CODE
+#!/usr/bin/env ruby
+
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'config', 'environment'))
+require 'delayed/command'
+Delayed::Command.new(ARGV).daemonize
+
+CODE
+
+# Rollbar
+file "bin/rollbar-rails-runner", <<-CODE
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+#
+# This file was generated by Bundler.
+#
+# The application 'rollbar-rails-runner' is installed as part of a gem, and
+# this file is here to facilitate running it.
+#
+
+require "pathname"
+ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../../Gemfile",
+  Pathname.new(__FILE__).realpath)
+
+require "rubygems"
+require "bundler/setup"
+
+load Gem.bin_path("rollbar", "rollbar-rails-runner")
+
+CODE
+
+remove_dir "vendor"
+
+# Testing
+empty_directory "test/carriers"
+empty_directory "test/jobs"
+empty_directory "test/services"
+file "test/factories.rb"
+
+inject_into_file "test/test_helper.rb", before: /\A.*/ do
+<<-CODE
+def enable_test_coverage
+  require 'simplecov'
+
+  SimpleCov.start do
+    add_filter "/test/"
+
+    add_group "Models", "app/models"
+    add_group "Controllers", "app/controllers"
+    add_group "Services", "app/services"
+    add_group "Helpers", "app/helpers"
+    add_group "Mailers", "app/mailers"
+    add_group "Workers", "app/workers"
+    add_group "Jobs", "app/jobs"
+    add_group "Carriers", "app/carriers"
+    add_group "Uploaders", "app/uploaders"
+  end
+end
+
+enable_test_coverage if ENV['COVERAGE']
+
+CODE
+end
+inject_into_file "test/test_helper.rb", after: "require 'rails/test_help'\n" do
+<<-CODE
+require "mocha/setup"
+require "rake/testtask"
+require "webmock/minitest"
+require "minitest/reporters"
+
+reporter_options = { color: true, slow_count: 10 }
+
+Minitest::Reporters.use!(
+  Minitest::Reporters::DefaultReporter.new(reporter_options),
+  ENV,
+  Minitest.backtrace_filter
+)
+
+DatabaseCleaner.strategy = :truncation
+
+CODE
+end
+inject_into_file "test/test_helper.rb", "\n\n  ActiveRecord::Migration.check_pending!", after: "class ActiveSupport::TestCase"
+inject_into_file "test/test_helper.rb", "\n  include FactoryGirl::Syntax::Methods", after: "fixtures :all"
+inject_into_file "test/test_helper.rb", after: /\z/ do
+<<-CODE
+
+class ActionController::TestCase
+
+  include Devise::Test::ControllerHelpers
+
+end
+
+require "vcr"
+
+VCR.configure do |c|
+  c.hook_into :webmock
+  c.cassette_library_dir = "test/vcr_cassettes"
+  c.default_cassette_options = { record: :new_episodes, allow_playback_repeats: true }
+  # c.debug_logger = STDOUT
+  c.allow_http_connections_when_no_cassette = true
+end
+
+CODE
+end
+
+# assets
+inject_into_file "config/initializers/assets.rb", after: /\z/ do
+<<-CODE
+
+Rails.application.config.assets.precompile += %w(
+  application_desktop.css
+  application_phone.css
+  application_desktop.js
+  application_phone.js
+)
+
+CODE
+end
+
+# Bullet
+file "config/initializers/bullet.rb", <<-CODE
+if Rails.env.development? && defined?(Bullet)
+  Bullet.enable = true
+  Bullet.bullet_logger = true
+  Bullet.rails_logger = true
+  Bullet.unused_eager_loading_enable = true
+end
+
+CODE
+
+# generate(:scaffold, "person name:string")
+# route "root to: 'people#index'"
+# rails_command("db:migrate")
+
+# after_bundle do
+#   git :init
+#   git add: "."
+#   git commit: %Q{ -m 'Initial commit' }
+# end

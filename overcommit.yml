@@ -21,6 +21,12 @@ PreCommit:
   BundleCheck:
     enabled: true
 
+  EsLint:
+    enabled: true
+
+  HamlLint:
+    enabled: true
+
   LocalPathsInGemfile:
     enabled: true
 
@@ -30,6 +36,9 @@ PreCommit:
   RuboCop:
     enabled: true
     on_warn: fail
+
+  ScssLint:
+    enabled: true
 
   TrailingWhitespace:
     enabled: true

@@ -84,6 +84,7 @@ group :test do
   gem "codeclimate-test-reporter", require: nil # CodeClimate test coverage
   gem "database_cleaner" # database cleaner for testing
   gem "factory_girl_rails" # for setting up ruby objects as test data
+  gem "haml-lint" # style checking for haml
   gem "launchy"
   gem "minitest-capybara"
   gem "minitest-ci", git: "https://github.com/circleci/minitest-ci"

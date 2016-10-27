@@ -3,7 +3,7 @@ source_paths.unshift(File.dirname(__FILE__))
 apply "Gemfile.rb"
 
 apply "app/assets/stylesheets/application.scss.rb"
-copy_file "app/assets/stylesheets/bootstrap/common.scss"
+copy_file "app/assets/stylesheets/bootstrap/custom.scss"
 copy_file "app/assets/stylesheets/bootstrap/devise_forms.scss"
 
 apply "app/assets/javascripts/application.js.rb"

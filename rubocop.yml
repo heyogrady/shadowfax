@@ -1,3 +1,18 @@
+AllCops:
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+  Exclude:
+    - "bin/**/*"
+    - "tmp/**/*"
+    - Capfile
+    - config/boot.rb
+    - config/environment.rb
+    - config/initializers/version.rb
+    - db/schema.rb
+    - Gemfile
+    - Guardfile
+    - Rakefile
+
 inherit_from:
   - config/.rubocop.yml
 

@@ -1,9 +1,31 @@
-# TrailingCommaAllCops:
-#   Exclude:
-#     - db/schema.rb
-#     - "db/**/*"
 AllCops:
-  TargetRubyVersion: 2.3
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+  TargetRubyVersion: <%= RUBY_VERSION[/\d+\.\d+/] %>
+  Exclude:
+    - "bin/*"
+    - Capfile
+    - config/boot.rb
+    - config/environment.rb
+    - config/initializers/version.rb
+    - db/schema.rb
+    - "tmp/**/*"
+    - Gemfile
+    - Guardfile
+    - Rakefile
+
+Metrics/AbcSize:
+  Exclude:
+    - "test/**/*"
+
+Metrics/ClassLength:
+  Exclude:
+    - "test/**/*"
+
+Metrics/LineLength:
+  Exclude:
+    - "config/**/*"
+    - "db/**/*"
 
 Rails:
   Enabled: true

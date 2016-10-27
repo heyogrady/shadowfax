@@ -2,9 +2,13 @@ AllCops:
   Exclude:
     - "bin/**/*"
     - "config/**/*"
-    - db/schema.rb
     - "db/**/*"
     - "lib/archive/**/*"
+    - "tmp/**/*"
+    - Capfile
+    - Gemfile
+    - Guardfile
+    - Rakefile
 
   RunRailsCops: true
 
@@ -13,6 +17,19 @@ AccessorMethodName:
 
 # ActionFilter:
 #   Enabled: false
+
+Metrics/AbcSize:
+  Exclude:
+    - "test/**/*"
+
+Metrics/ClassLength:
+  Exclude:
+    - "test/**/*"
+
+Metrics/LineLength:
+  Exclude:
+    - "config/**/*"
+    - "db/**/*"
 
 Alias:
   Enabled: false

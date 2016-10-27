@@ -3,7 +3,7 @@ copy_file "config/brakeman.yml"
 copy_file "config/database.example.yml"
 copy_file "config/database.yml.ci"
 copy_file "config/puma.rb", force: true
-copy_file "config/rubocop.yml", "config/.rubocop.yml"
+template "config/rubocop.yml.tt"
 copy_file "config/rubocop-hound.yml", "config/.rubocop-hound.yml"
 copy_file "config/javascript_ignore", "config/.javascript_ignore"
 copy_file "config/jshint.json", "config/.jshint.json"

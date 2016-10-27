@@ -7,16 +7,19 @@ def apply_template!
   add_shadowfax_repo_to_source_path
 
   template "Gemfile.tt", force: true
+
   template "DEPLOYMENT.md.tt"
   template "PROVISIONING.md.tt"
   template "README.md.tt", force: true
   remove_file "README.rdoc"
 
+  template "example.env.tt"
+  template "app.json.tt", "app.json"
+  template "circle.yml.tt", "circle.yml"
   copy_file "codeclimate.yml", ".codeclimate.yml"
   copy_file "csslintrc", ".csslintrc"
   copy_file "eslintignore", ".eslintignore"
   copy_file "eslintrc", ".eslintrc"
-  template "example.env.tt"
   copy_file "gitignore", ".gitignore", force: true
   copy_file "jshintrc", ".jshintrc"
   copy_file "overcommit.yml", ".overcommit.yml"
@@ -24,11 +27,9 @@ def apply_template!
   copy_file "rubocop.yml", ".rubocop.yml"
   template "ruby-version.tt", ".ruby-version", force: true
   copy_file "simplecov", ".simplecov"
-  template "app.json.tt", "app.json"
 
   copy_file "Capfile"
   copy_file "Guardfile"
-  template "circle.yml.tt", "circle.yml"
   copy_file "Procfile"
 
   remove_dir "vendor"
@@ -73,6 +74,27 @@ def apply_template!
   end
 end
 
+require "fileutils"
+require "shellwords"
+
+# Add this template directory to source_paths so that Thor actions like
+# copy_file and template resolve against our source files. If this file was
+# invoked remotely via HTTP, that means the files are not present locally.
+# In that case, use `git clone` to download them to a local temporary dir.
+def add_shadowfax_repo_to_source_path
+  if __FILE__ =~ %r{\Ahttps?://}
+    source_paths.unshift(tempdir = Dir.mktmpdir("rails-template-"))
+    at_exit { FileUtils.remove_entry(tempdir) }
+    git :clone => [
+      "--quiet",
+      "https://github.com/heyogrady/shadowfax.git",
+      tempdir
+    ].map(&:shellescape).join(" ")
+  else
+    source_paths.unshift(File.dirname(__FILE__))
+  end
+end
+
 def check_rails_version
   required_version = Gem::Requirement.new(REQUIRED_RAILS_VERSION)
   current_version = Gem::Version.new(Rails::VERSION::STRING)
@@ -106,23 +128,6 @@ def verify_db_is_postgres
     Rails::Generators::Error,
     "This template requires PostgreSQL, but the pg gem isn't present in your Gemfile"
   )
-end
-
-require "fileutils"
-require "shellwords"
-
-def add_shadowfax_repo_to_source_path
-  if __FILE__ =~ %r{\Ahttps?://}
-    source_paths.unshift(tempdir = Dir.mktmpdir("rails-template-"))
-    at_exit { FileUtils.remove_entry(tempdir) }
-    git :clone => [
-      "--quiet",
-      "https://github.com/heyogrady/shadowfax.git",
-      tempdir
-    ].map(&:shellescape).join(" ")
-  else
-    source_paths.unshift(File.dirname(__FILE__))
-  end
 end
 
 # Mimic the convention used by capistrano-mb in order to generate
@@ -183,15 +188,3 @@ def run_rubocop_autocorrections
 end
 
 apply_template!
-
-# Testing
-
-# generate(:scaffold, "person name:string")
-# route "root to: 'people#index'"
-# rails_command("db:migrate")
-
-# after_bundle do
-#   git :init
-#   git add: "."
-#   git commit: %Q{ -m 'Initial commit' }
-# end

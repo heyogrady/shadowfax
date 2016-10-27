@@ -62,3 +62,5 @@ copy_file "app/views/users/registrations/new.html.haml"
 copy_file "app/views/users/sessions/new.html.haml"
 copy_file "app/views/users/shared/_links.haml"
 copy_file "app/views/users/unlocks/new.html.haml"
+
+remove_file "app/views/layouts/application.html.erb"

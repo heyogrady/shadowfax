@@ -1,8 +1,20 @@
 empty_directory_with_keep_file "app/facades"
 empty_directory_with_keep_file "app/workers"
 
+copy_file "app/assets/stylesheets/common/active_admin.scss"
+copy_file "app/assets/stylesheets/common/alerts.scss"
+copy_file "app/assets/stylesheets/common/base.scss"
+copy_file "app/assets/stylesheets/active_admin.scss"
 copy_file "app/assets/stylesheets/application.scss"
+
 remove_file "app/assets/stylesheets/application.css"
+
+copy_file "app/assets/javascripts/common/active_admin.js"
+copy_file "app/assets/javascripts/active_admin.js.coffee"
+copy_file "app/assets/javascripts/application.js", force: true
+
+copy_file "app/admin/dashboard.rb"
+copy_file "app/admin/user.rb"
 
 copy_file "app/carriers/layout_carrier.rb"
 
@@ -62,5 +74,3 @@ copy_file "app/views/users/registrations/new.html.haml"
 copy_file "app/views/users/sessions/new.html.haml"
 copy_file "app/views/users/shared/_links.haml"
 copy_file "app/views/users/unlocks/new.html.haml"
-
-remove_file "app/views/layouts/application.html.erb"

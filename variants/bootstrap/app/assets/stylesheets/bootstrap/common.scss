@@ -1,14 +1,3 @@
-// BOOTSTRAP.CSS
-// Assembles all the modules of the Twitter Bootstrap framework
-// --------------------------------------------------------------------------
-
-// Tip: comment out any modules of Bootstrap that you don't need!
-
-// Sprockets compatibility
-@import "bootstrap-sprockets";
-
-// ----- Bootstrap modules -----
-
 // Core variables and mixins
 @import "bootstrap/variables";
 @import "bootstrap/mixins";

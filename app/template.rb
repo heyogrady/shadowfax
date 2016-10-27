@@ -32,7 +32,6 @@ copy_file "app/controllers/sessions_controller.rb"
 
 copy_file "app/helpers/application_helper.rb", force: true
 copy_file "app/helpers/javascript_helper.rb"
-copy_file "app/helpers/layout_helper.rb"
 copy_file "app/helpers/retina_image_helper.rb"
 
 copy_file "app/mailers/base_mailer.rb"

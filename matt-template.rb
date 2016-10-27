@@ -1,42 +1,32 @@
-REQUIRED_RAILS_VERSION = "~> 5.0.0"
+RAILS_REQUIREMENT = "~> 4.2.0"
 
 def apply_template!
-  check_rails_version
-  verify_all_options_are_valid
-  verify_db_is_postgres
-  add_shadowfax_repo_to_source_path
+  assert_minimum_rails_version
+  assert_valid_options
+  assert_postgresql
+  add_template_repository_to_source_path
 
-  template "Gemfile.tt", force: true
+  template "Gemfile.tt", :force => true
+
   template "DEPLOYMENT.md.tt"
   template "PROVISIONING.md.tt"
-  template "README.md.tt", force: true
+  template "README.md.tt", :force => true
   remove_file "README.rdoc"
 
-  copy_file "codeclimate.yml", ".codeclimate.yml"
-  copy_file "csslintrc", ".csslintrc"
-  copy_file "eslintignore", ".eslintignore"
-  copy_file "eslintrc", ".eslintrc"
   template "example.env.tt"
-  copy_file "gitignore", ".gitignore", force: true
-  copy_file "jshintrc", ".jshintrc"
+  copy_file "gitignore", ".gitignore", :force => true
+  copy_file "jenkins-ci.sh", :mode => :preserve
   copy_file "overcommit.yml", ".overcommit.yml"
-  copy_file "pryrc", ".pryrc"
-  copy_file "rubocop.yml", ".rubocop.yml"
-  template "ruby-version.tt", ".ruby-version", force: true
+  template "ruby-version.tt", ".ruby-version"
   copy_file "simplecov", ".simplecov"
-  template "app.json.tt", "app.json"
 
   copy_file "Capfile"
   copy_file "Guardfile"
-  template "circle.yml.tt", "circle.yml"
-  copy_file "Procfile"
 
-  remove_dir "vendor"
-
+  apply "config.ru.rb"
   apply "app/template.rb"
   apply "bin/template.rb"
   apply "config/template.rb"
-  apply "db/template.rb"
   apply "doc/template.rb"
   apply "lib/template.rb"
   apply "public/template.rb"
@@ -51,45 +41,64 @@ def apply_template!
   generate_spring_binstubs
 
   binstubs = %w(
-    annotate
-    brakeman
-    bundler-audit
-    capistrano
-    guard
-    rollbar
-    rubocop
+    annotate brakeman bundler-audit capistrano guard rubocop sidekiq
     terminal-notifier
   )
   run_with_clean_bundler_env "bundle binstubs #{binstubs.join(' ')}"
+
+  template "rubocop.yml.tt", ".rubocop.yml"
   run_rubocop_autocorrections
 
   unless preexisting_git_repo?
-    git add: "-A ."
-    git commit: "-n -m 'Set up project'"
+    git :add => "-A ."
+    git :commit => "-n -m 'Set up project'"
+    git :checkout => "-b development"
     if git_repo_specified?
-      git remote: "add origin #{git_repo_url.shellescape}"
-      git push: "-u origin --all"
+      git :remote => "add origin #{git_repo_url.shellescape}"
+      git :push => "-u origin --all"
     end
   end
 end
 
-def check_rails_version
-  required_version = Gem::Requirement.new(REQUIRED_RAILS_VERSION)
-  current_version = Gem::Version.new(Rails::VERSION::STRING)
-  return if required_version.satisfied_by?(current_version)
+require "fileutils"
+require "shellwords"
 
-  prompt = "This template require Rails #{REQUIRED_RAILS_VERSION}. "\
-           "You are using #{current_version}. Continue anyway?"
+# Add this template directory to source_paths so that Thor actions like
+# copy_file and template resolve against our source files. If this file was
+# invoked remotely via HTTP, that means the files are not present locally.
+# In that case, use `git clone` to download them to a local temporary dir.
+def add_template_repository_to_source_path
+  if __FILE__ =~ %r{\Ahttps?://}
+    source_paths.unshift(tempdir = Dir.mktmpdir("rails-template-"))
+    at_exit { FileUtils.remove_entry(tempdir) }
+    git :clone => [
+      "--quiet",
+      "https://github.com/mattbrictson/rails-template.git",
+      tempdir
+    ].map(&:shellescape).join(" ")
+  else
+    source_paths.unshift(File.dirname(__FILE__))
+  end
+end
+
+def assert_minimum_rails_version
+  requirement = Gem::Requirement.new(RAILS_REQUIREMENT)
+  rails_version = Gem::Version.new(Rails::VERSION::STRING)
+  return if requirement.satisfied_by?(rails_version)
+
+  prompt = "This template requires Rails #{RAILS_REQUIREMENT}. "\
+           "You are using #{rails_version}. Continue anyway?"
   exit 1 if no?(prompt)
 end
 
-def verify_all_options_are_valid
+# Bail out if user has passed in contradictory generator options.
+def assert_valid_options
   valid_options = {
-    skip_gemfile: false,
-    skip_bundle: false,
-    skip_git: false,
-    skip_test_unit: false,
-    edge: false
+    :skip_gemfile => false,
+    :skip_bundle => false,
+    :skip_git => false,
+    :skip_test_unit => false,
+    :edge => false
   }
   valid_options.each do |key, expected|
     next unless options.key?(key)
@@ -100,29 +109,11 @@ def verify_all_options_are_valid
   end
 end
 
-def verify_db_is_postgres
+def assert_postgresql
   return if IO.read("Gemfile") =~ /^\s*gem ['"]pg['"]/
-  fail(
-    Rails::Generators::Error,
-    "This template requires PostgreSQL, but the pg gem isn't present in your Gemfile"
-  )
-end
-
-require "fileutils"
-require "shellwords"
-
-def add_shadowfax_repo_to_source_path
-  if __FILE__ =~ %r{\Ahttps?://}
-    source_paths.unshift(tempdir = Dir.mktmpdir("rails-template-"))
-    at_exit { FileUtils.remove_entry(tempdir) }
-    git :clone => [
-      "--quiet",
-      "https://github.com/heyogrady/shadowfax.git",
-      tempdir
-    ].map(&:shellescape).join(" ")
-  else
-    source_paths.unshift(File.dirname(__FILE__))
-  end
+  fail Rails::Generators::Error,
+       "This template requires PostgreSQL, "\
+       "but the pg gem isn’t present in your Gemfile."
 end
 
 # Mimic the convention used by capistrano-mb in order to generate
@@ -143,12 +134,12 @@ end
 
 def staging_hostname
   @staging_hostname ||=
-    ask_with_default("Staging hostname?", :blue, "#{app_name}-staging.herokuapp.com")
+    ask_with_default("Staging hostname?", :blue, "staging.example.com")
 end
 
 def gemfile_requirement(name)
   @original_gemfile ||= IO.read("Gemfile")
-  req = @original_gemfile[/gem\s+['"]#{name}['"]\s*(,[><~= \t\d\.\w'"]*)?.*$/, 1]
+  req = @original_gemfile[/gem\s+['"]#{name}['"]\s*(,[><~= \t\d\.\w'"]*).*$/, 1]
   req && req.gsub("'", %(")).strip.sub(/^,\s*"/, ', "')
 end
 
@@ -183,15 +174,3 @@ def run_rubocop_autocorrections
 end
 
 apply_template!
-
-# Testing
-
-# generate(:scaffold, "person name:string")
-# route "root to: 'people#index'"
-# rails_command("db:migrate")
-
-# after_bundle do
-#   git :init
-#   git add: "."
-#   git commit: %Q{ -m 'Initial commit' }
-# end

@@ -1,0 +1,17 @@
+machine:
+  timezone:
+    America/New_York
+  ruby:
+    version:
+      2.3.1
+
+# Customize database setup
+database:
+  override:
+  # replace CircleCI's generated database.yml
+  - cp config/database.yml.ci config/database.yml
+  - bin/rake db:create db:schema:load --trace
+
+test:
+  minitest_globs:
+    - test/**/*_test.rb

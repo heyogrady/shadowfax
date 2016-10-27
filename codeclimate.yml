@@ -1,0 +1,46 @@
+---
+engines:
+  brakeman:
+    enabled: true
+  bundler-audit:
+    enabled: true
+  csslint:
+    enabled: true
+  eslint:
+    enabled: true
+    channel: "eslint-2"
+  fixme:
+    enabled: true
+  rubocop:
+    enabled: true
+    exclude_fingerprints:
+    # app/services/search/leads.rb:9 - more than 4 params in list
+    - bb706e2c80eb8853c14b5e7a40c3000b
+  scss-lint:
+    enabled: true
+ratings:
+  paths:
+  - Gemfile.lock
+  - "**.coffee"
+  - "**.js"
+  - "**.jsx"
+  - "**.rb"
+exclude_paths:
+- ".github/**/*"
+- "app/admin/**/*"
+- "app/assets/fonts/**/*"
+- "app/assets/images/**/*"
+- "app/assets/javascripts/third-party/**/*"
+- "app/assets/javascripts/common/vendor/**/*"
+- "app/assets/stylesheets/third-party/**/*"
+- "config/**/*"
+- "coverage/**/*"
+- "db/**/*"
+- "bin/**/*"
+- "lib/archive/**/*"
+- "log/**/*"
+- "public/**/*"
+- "test/**/*"
+- "tmp/**/*"
+- "uploads/**/*"
+- "vendor/**/*"

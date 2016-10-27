@@ -6,6 +6,6 @@ end
 
 insert_into_file "Gemfile", :after => /gem "fog-aws".*\n/ do
   <<-GEMS.strip_heredoc
-    gem "font-awesome-rails" # To use Font Awesome
+    gem "font-awesome-sass", "~> 4.3.0" # To use Font Awesome
   GEMS
 end

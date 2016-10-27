@@ -8,17 +8,20 @@
 /.bundle
 
 # Ignore all logfiles and tempfiles.
-/log/*.log
-/log/*.log.*
-/tmp
-/db/backups
-public/uploads
-.idea
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
 *.DS_Store
-coverage
-/brakeman-output.*
-.*swp
+public/uploads
 /uploads/*
+
+# Ignore Byebug command history file.
+.byebug_history
+
+# Ignore test reports
+/brakeman-output.*
+/coverage
 
 # Ignore results of `rake assets:precompile`.
 /public/assets/

@@ -1,8 +1,8 @@
 source "https://rubygems.org"
 
-ruby "2.3.1"
+ruby "2.4.0"
 
-gem "rails", "5.0.0.1"
+gem "rails", "5.1.0.rc2"
 
 # Friends of Rails
 gem "jquery-rails" # jQuery
@@ -30,11 +30,11 @@ gem "foreman" # run server and worker
 gem "haml-rails" # haml as templating engine
 gem "inherited_resources", git: "https://github.com/activeadmin/inherited_resources"
 gem "jbuilder", ">= 2.4.1" # for building JSON
-gem "json" # for parsing JSON
+gem "json", git: "https://github.com/flori/json", branch: "v1.8"
 gem "mandrill-api" # sending and tracking emails
 gem "marginalia", git: "https://github.com/basecamp/marginalia" # query comments
 gem "newrelic_rpm" # monitor app performance
-gem "puma", "~> 3.2" # server
+gem "puma", "~> 3.8" # server
 gem "rack-protection", git: "https://github.com/sinatra/sinatra" # DJ dependency
 gem "rack-timeout" # raise error if Puma doesn't respond in given time
 gem "redis-namespace"
@@ -45,9 +45,11 @@ gem "sinatra", git: "https://github.com/sinatra/sinatra" # DJ dependency
 gem "therubyracer", platforms: :ruby
 gem "turbolinks", "~> 5"
 gem "twilio-ruby" # phone and SMS services
+gem "webpacker", git: "https://github.com/rails/webpacker" # webpack assets
 
 group :development do
   gem "annotate" # auto generate schema documentation
+  gem "bcrypt_pbkdf", require: false # to support ed25519 keys in net-ssh
   gem "better_errors" # better rails error messages
   gem "binding_of_caller" # interactive console in browser on errors
   gem "brakeman", require: false # security vulnerability scanner
@@ -68,14 +70,16 @@ group :development do
   gem "meta_request" # for usings RailsPanel Chrome extension
   gem "overcommit", require: false # git hooks
   gem "rack-livereload"
-  gem "rubocop" # evaluate against style guide
+  gem "rbnacl", "~> 3.4", require: false # to support ed25519 keys in net-ssh
+  gem "rbnacl-libsodium", require: false # to support ed25519 keys in net-ssh
+  gem "rubocop", ">= 0.44.0", require: false # evaluate against style guide
   gem "shog" # colored log output
   gem "spring" # speeds up development by keeping app running in the background
   gem "spring-watcher-listen"
   gem "terminal-notifier", require: false # send notifications to macOS
   gem "terminal-notifier-guard", require: false # terminal-notifier + Guard
   gem "web-console", "~> 3.0" # for debugging via in-browser IRB consoles
-  gem "xray-rails", ">= 0.1.18" # inspect view partials in the browser
+  # gem "xray-rails", ">= 0.1.18" # inspect view partials in the browser
 end
 
 group :test do

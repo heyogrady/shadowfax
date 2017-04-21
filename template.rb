@@ -1,4 +1,4 @@
-REQUIRED_RAILS_VERSION = "~> 5.0.0"
+REQUIRED_RAILS_VERSION = "~> 5.1.0.rc2"
 
 def apply_template!
   check_rails_version
@@ -23,6 +23,8 @@ def apply_template!
   copy_file "gitignore", ".gitignore", force: true
   copy_file "jshintrc", ".jshintrc"
   copy_file "overcommit.yml", ".overcommit.yml"
+  template "package.json.tt", "package.json", force: true
+  copy_file "postcssrc.yml", ".postcssrc.yml"
   copy_file "pryrc", ".pryrc"
   copy_file "rubocop.yml", ".rubocop.yml"
   template "ruby-version.tt", ".ruby-version", force: true
@@ -31,6 +33,7 @@ def apply_template!
   copy_file "Capfile"
   copy_file "Guardfile"
   copy_file "Procfile"
+  copy_file "Procfile.dev"
 
   remove_dir "vendor"
 
@@ -64,7 +67,7 @@ def apply_template!
   run_with_clean_bundler_env "bundle binstubs #{binstubs.join(' ')}"
   run_rubocop_autocorrections
 
-  unless preexisting_git_repo?
+  if empty_git_repo?
     git add: "-A ."
     git commit: "-n -m 'Set up project'"
     if git_repo_specified?
@@ -171,6 +174,11 @@ end
 def preexisting_git_repo?
   @preexisting_git_repo ||= (File.exist?(".git") || :nope)
   @preexisting_git_repo == true
+end
+
+def empty_git_repo?
+  return @empty_git_repo if defined?(@empty_git_repo)
+  @empty_git_repo = !system("git rev-list -n 1 --all &> /dev/null")
 end
 
 def apply_bootstrap?

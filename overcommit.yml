@@ -24,6 +24,12 @@ PreCommit:
   EsLint:
     enabled: true
 
+  FixMe:
+    enabled: true
+    keywords: ["FIXME"]
+    exclude:
+      - .overcommit.yml
+
   HamlLint:
     enabled: true
 

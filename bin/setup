@@ -15,6 +15,7 @@ def setup!
     run "bin/rake db:create:all"
     run "bin/rake db:migrate"
     run "bin/rake setup_sample_data"
+    run "bin/yarn"
   end
 end
 

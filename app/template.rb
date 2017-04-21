@@ -34,6 +34,10 @@ copy_file "app/helpers/application_helper.rb", force: true
 copy_file "app/helpers/javascript_helper.rb"
 copy_file "app/helpers/retina_image_helper.rb"
 
+copy_file "app/javascript/packs/app.vue"
+copy_file "app/javascript/packs/application.js"
+copy_file "app/javascript/packs/hello_vue.js"
+
 copy_file "app/mailers/base_mailer.rb"
 copy_file "app/mailers/mailer.rb"
 

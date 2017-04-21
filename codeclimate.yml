@@ -13,9 +13,6 @@ engines:
     enabled: true
   rubocop:
     enabled: true
-    exclude_fingerprints:
-    # app/services/search/leads.rb:9 - more than 4 params in list
-    - bb706e2c80eb8853c14b5e7a40c3000b
   scss-lint:
     enabled: true
 ratings:

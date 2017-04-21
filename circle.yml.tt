@@ -3,7 +3,17 @@ machine:
     America/New_York
   ruby:
     version:
-      2.3.1
+      2.4.0
+  node:
+    version:
+      7.9.0
+
+dependencies:
+  post:
+    - bin/yarn
+  cache_directories:
+    - "node_modules"
+    - ~/.cache/yarn
 
 # Customize database setup
 database:
@@ -13,5 +23,7 @@ database:
   - bin/rake db:create db:schema:load --trace
 
 test:
+  pre:
+    - bin/webpack
   minitest_globs:
     - test/**/*_test.rb

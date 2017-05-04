@@ -14,6 +14,9 @@ copy_file "app/helpers/navbar_helper.rb"
 template "app/views/shared/_footer.html.erb.tt"
 template "app/views/shared/_navbar.html.erb.tt"
 copy_file "app/views/shared/_page_header.erb"
+
+copy_file "config/initializers/simple_form_bootstrap.rb", force: true
+
 copy_file "lib/templates/erb/controller/view.html.erb"
 copy_file "lib/templates/erb/scaffold/_form.html.erb"
 copy_file "lib/templates/erb/scaffold/edit.html.erb"

@@ -6,6 +6,7 @@ apply "app/assets/stylesheets/application.scss.rb"
 copy_file "app/assets/stylesheets/semantic-ui/foot-locker.scss"
 
 apply "app/assets/javascripts/application.js.rb"
+copy_file "app/assets/javascripts/common/semantic-ui.js"
 
 copy_file "app/inputs/sui_check_boxes_input.rb"
 copy_file "app/inputs/sui_currency_input.rb"

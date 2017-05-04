@@ -31,6 +31,7 @@ gem "haml-rails" # haml as templating engine
 gem "inherited_resources", git: "https://github.com/activeadmin/inherited_resources"
 gem "jbuilder", ">= 2.4.1" # for building JSON
 gem "json", git: "https://github.com/flori/json", branch: "v1.8"
+gem "kaminari" # pagination
 gem "mandrill-api" # sending and tracking emails
 gem "marginalia", git: "https://github.com/basecamp/marginalia" # query comments
 gem "newrelic_rpm" # monitor app performance

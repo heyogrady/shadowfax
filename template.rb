@@ -47,6 +47,7 @@ def apply_template!
   apply "test/template.rb"
 
   apply "variants/bootstrap/template.rb" if apply_bootstrap?
+  apply "variants/semantic-ui/template.rb" if apply_semantic_ui?
 
   git :init unless preexisting_git_repo?
   empty_directory ".git/safe"
@@ -183,6 +184,11 @@ end
 
 def apply_bootstrap?
   ask_with_default("Use Bootstrap gems, layouts, views, etc.?", :blue, "no")\
+    =~ /^y(es)?/i
+end
+
+def apply_semantic_ui?
+  ask_with_default("Use Semantic UI gems, layouts, views, etc.?", :blue, "no")\
     =~ /^y(es)?/i
 end
 

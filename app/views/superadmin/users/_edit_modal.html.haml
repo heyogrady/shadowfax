@@ -5,7 +5,6 @@
   .row{style: "padding-top: 10px;"}
     = simple_form_for(@user, url: superadmin_user_path(@user),                                     |
                              method: :patch,                                                       |
-                             wrapper: :bootstrap3,                                                 |
                              html: { method: :put, class: 'bootstrap-center-form-medium' }) do |f| |
       .form-controls
         = f.input :email, required: true,                       |

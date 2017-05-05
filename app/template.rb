@@ -31,6 +31,7 @@ copy_file "app/controllers/registrations_controller.rb"
 copy_file "app/controllers/sessions_controller.rb"
 
 copy_file "app/helpers/application_helper.rb", force: true
+copy_file "app/helpers/layout_helper.rb"
 copy_file "app/helpers/javascript_helper.rb"
 copy_file "app/helpers/retina_image_helper.rb"
 
@@ -51,6 +52,7 @@ copy_file "app/uploaders/profile_image_uploader.rb"
 
 copy_file "app/views/home/index.html.haml"
 copy_file "app/views/layouts/application.html.erb", force: true
+template "app/views/layouts/base.html.erb.tt", "app/views/layouts/base.html.erb"
 copy_file "app/views/layouts/mailer.haml"
 copy_file "app/views/layouts/superadmin.html.haml"
 copy_file "app/views/mailer/contact_us_notification.html.haml"

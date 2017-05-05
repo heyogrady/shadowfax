@@ -30,8 +30,8 @@ PreCommit:
     exclude:
       - .overcommit.yml
 
-  HamlLint:
-    enabled: true
+  # HamlLint:
+  #   enabled: true
 
   LocalPathsInGemfile:
     enabled: true

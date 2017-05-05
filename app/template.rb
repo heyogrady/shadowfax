@@ -50,7 +50,7 @@ copy_file "app/services/addition_service.rb"
 copy_file "app/uploaders/profile_image_uploader.rb"
 
 copy_file "app/views/home/index.html.haml"
-copy_file "app/views/layouts/application.html.erb"
+copy_file "app/views/layouts/application.html.erb", force: true
 copy_file "app/views/layouts/mailer.haml"
 copy_file "app/views/layouts/superadmin.html.haml"
 copy_file "app/views/mailer/contact_us_notification.html.haml"

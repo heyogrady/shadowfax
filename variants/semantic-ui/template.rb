@@ -24,7 +24,7 @@ template "app/views/shared/_menu.html.erb.tt"
 copy_file "app/views/shared/_page_header.erb"
 
 copy_file "config/initializers/simple_form.rb", force: true
-copy_file "config/initializers/simple_form_semantic-ui.rb"
+copy_file "config/initializers/simple_form_semantic_ui.rb"
 
 copy_file "lib/templates/erb/controller/view.html.erb"
 copy_file "lib/templates/erb/scaffold/_form.html.erb"
